@@ -143,9 +143,9 @@ function startApp(mode) {
     spawnSync('docker-compose', ['up', '-d'], { stdio: 'inherit', shell: true });
     console.log("\\n[SYSTEM] OmniHub berjalan di Docker! Akses http://localhost:3000");
   } else {
-    console.log("Menjalankan server Node.js Monolitik...");
-    // Mengeksekusi server.ts langsung dengan ts-node/tsx melalui npx
-    spawnSync('npx', ['ts-node', 'server.ts'], { stdio: 'inherit', shell: true });
+    console.log("Menjalankan server Node.js Monolitik menggunakan tsx...");
+    // Mengeksekusi server.ts menggunakan 'tsx' (Kompatibel untuk Node 20/22+ ESM)
+    spawnSync('npx', ['tsx', 'server.ts'], { stdio: 'inherit', shell: true });
   }
 }
 

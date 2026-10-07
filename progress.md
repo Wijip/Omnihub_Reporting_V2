@@ -100,6 +100,7 @@
 - Implemented deployment mode selection: Docker containerized vs monolithic bare-metal.
 - Added dynamic `.env` and `docker-compose.yml` generation with NVIDIA GPU resource reservation.
 - Configured `.omnihub-setup-done` configuration lock mechanism and cross-platform process spawning.
+- Upgraded bare-metal monolithic spawn runner to execute via `tsx` instead of `ts-node` for clean Node.js 20/22+ ESM runtime compatibility.
 
 
 
