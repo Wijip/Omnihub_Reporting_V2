@@ -1,0 +1,45 @@
+{
+  "maxUploadSizeGB": 5,
+  "144p": {
+    "active": false,
+    "width": 256,
+    "height": 144,
+    "videoBitrate": "300k",
+    "audioBitrate": "64k"
+  },
+  "240p": {
+    "active": false,
+    "width": 426,
+    "height": 240,
+    "videoBitrate": "600k",
+    "audioBitrate": "64k"
+  },
+  "360p": {
+    "active": true,
+    "width": 640,
+    "height": 360,
+    "videoBitrate": "1000k",
+    "audioBitrate": "96k"
+  },
+  "480p": {
+    "active": true,
+    "width": 854,
+    "height": 480,
+    "videoBitrate": "1500k",
+    "audioBitrate": "128k"
+  },
+  "720p": {
+    "active": true,
+    "width": 1280,
+    "height": 720,
+    "videoBitrate": "4000k",
+    "audioBitrate": "128k"
+  },
+  "1080p": {
+    "active": true,
+    "width": 1920,
+    "height": 1080,
+    "videoBitrate": "8000k",
+    "audioBitrate": "192k"
+  }
+}

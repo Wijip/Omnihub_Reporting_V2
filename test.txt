@@ -1,0 +1,4 @@
+export function AdminControlPanel({ videos, onRefresh }: { videos: any[]; onRefresh: () => void }) {
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanSummary, setScanSummary] = useState<any>(null);
+  const [selectedVideoIds, setSelectedVideoIds] = useState<number[]>([]);

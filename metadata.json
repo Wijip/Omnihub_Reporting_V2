@@ -1,0 +1,9 @@
+{
+  "name": "OmniHub V2",
+  "description": "YouTube-style video streaming platform with advanced upload, analytics, and RBAC. (Sync cleanup performed)",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": []
+}

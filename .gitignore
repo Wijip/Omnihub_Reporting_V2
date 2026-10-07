@@ -1,0 +1,32 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+ffmpeg-*.log
+.env*
+!.env.example
+
+# App specific generated directories
+uploads/
+chunks/
+processed/
+thumbnails/
+
+# SQLite database
+*.db
+*.sqlite
+*.sqlite3
+
+# Video binaries
+*.mp4
+*.mkv
+*.avi
+*.mov
+*.webm
+*.flv
+*.wmv
+*.m4v
+*.ts
+*.m3u8

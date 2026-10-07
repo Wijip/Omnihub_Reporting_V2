@@ -1,0 +1,10 @@
+{
+  "resolutions": {
+    "144p": false,
+    "240p": false,
+    "360p": true,
+    "480p": true,
+    "720p": true,
+    "1080p": true
+  }
+}

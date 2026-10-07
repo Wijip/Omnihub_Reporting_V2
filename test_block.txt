@@ -1,0 +1,79 @@
+
+      // --- TAHAP 63.0: GEMINI 3.6 FLASH AUTO-REPORT GENERATOR PIPELINE ---
+      try {
+        const [videoMetaRows]: any = await db.query('SELECT title, description, student_name, program_id, meeting_number, session_date FROM Videos WHERE id = ?', [videoId]);
+        if (videoMetaRows && videoMetaRows.length > 0) {
+          const meta = videoMetaRows[0];
+          const studentName = meta.student_name || meta.title || 'Siswa';
+          const programId = meta.program_id;
+          const sessionDateStr = meta.session_date ? new Date(meta.session_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+          if (programId) {
+            console.log(`[GEMINI 63.0] Memulai analisis video dengan model gemini-3.6-flash untuk VideoID: ${videoId}...`);
+            
+            // 1. Ambil Nama Program
+            const [progRows]: any = await db.query('SELECT program_name FROM Programs WHERE id = ?', [programId]);
+            const programName = progRows.length > 0 ? progRows[0].program_name : 'Koding Akademi';
+
+            // 2. Hitung/Validasi Nomor Pertemuan Otomatis
+            const meetingCalc = await calculateNextMeeting(studentName, programId, meta.session_date);
+            const validMeetingNumber = meta.meeting_number || meetingCalc.recommendedMeeting;
+
+            // 3. Baca Berkas Video untuk Gemini Multimodal
+            const videoBuffer = fs.readFileSync(tempRestoredPath);
+            const videoBase64 = videoBuffer.toString('base64');
+
+            const promptText = `Kamu adalah Asisten Pengajar & Pembuat Laporan Pembelajaran Otomatis untuk Koding Akademi di OmniHub.
+Tugasmu adalah menganalisis berkas video pembelajaran yang diberikan dan mengekstrak materi serta ringkasan pembelajaran hari ini.
+
+Keluaran WAJIB berupa blok kode (markdown code block) dengan format persis seperti ini:
+
+\`\`\`text
+*WEEKLY REPORT*
+
+Tanggal: ${sessionDateStr}
+Nama: ${studentName}
+Pertemuan : ${validMeetingNumber}
+Program : ${programName}
+Materi: [Tuliskan ringkasan singkat materi teknis yang dipelajari di video]
+Pembelajaran hari ini : [Tuliskan 2-4 kalimat detail aktivitas siswa, perangkat/kode yang dibuat, serta kendala/troubleshooting yang berhasil diselesaikan]
+
+Note :Good Job ${studentName}, [Tuliskan kata-kata penyemangat yang relevan dengan pembelajaran siswa]
+\`\`\`
+
+Aturan Penulisan:
+1. "Materi" berupa ringkasan topik teknis yang dibahas dalam video.
+2. "Pembelajaran hari ini" menceritakan aktivitas siswa dalam video secara profesional dan ramah.
+3. "Note" wajib diawali dengan "Good Job ${studentName}," diikuti kata penyemangat.
+4. TAMPILKAN HANYA BLOK KODE KELUARAN TANPA TEKS PENGANTAR LAIN.`;
+
+            const aiResponse = await aiInstance.models.generateContent({
+              model: 'gemini-3.6-flash',
+              contents: [
+                {
+                  inlineData: {
+                    mimeType: 'video/mp4',
+                    data: videoBase64
+                  }
+                },
+                { text: promptText }
+              ]
+            });
+
+            const generatedReport = aiResponse.text ? aiResponse.text.trim() : '';
+
+            if (generatedReport) {
+              // Update Deskripsi Video dengan Laporan Gemini
+              await db.execute('UPDATE Videos SET description = ? WHERE id = ?', [generatedReport, videoId]);
+
+              // Update/Upsert StudentProgress
+              const sqlUpsert = `
+                INSERT INTO StudentProgress (student_name, program_id, last_meeting_number, last_session_date)
+                VALUES (?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE 
+                  last_meeting_number = VALUES(last_meeting_number),
+                  last_session_date = VALUES(last_session_date)
+              `;
+              const dbDate = meta.session_date ? new Date(meta.session_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+              await db.execute(sqlUpsert, [studentName.trim(), programId, validMeetingNumber, dbDate]);
+              console.log(`[GEMINI 63.0] Weekly Report berhasil digenerate dan dikaitkan ke VideoID: ${videoId}`);
